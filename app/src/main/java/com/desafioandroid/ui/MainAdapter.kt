@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.desafioandroid.R
 import com.desafioandroid.model.Posting
 
-class MainAdapter(var postingAdapterList: MutableList<Posting>, private var listener: OnPostClickListener) :
+class MainAdapter(private var listener: OnPostClickListener) :
     RecyclerView.Adapter<MainAdapter.ItemViewHolder>() {
+
+    var postingAdapterList: MutableList<Posting> = mutableListOf<Posting>()
 
     interface OnPostClickListener {
         fun postClick(position: Int)

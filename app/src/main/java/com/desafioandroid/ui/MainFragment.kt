@@ -70,19 +70,12 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
                 position: Int,
                 p4: Long
             ) {
-                var monthList = postingList.filter {
-                    it.mes_lancamento == position + 1
-                }
-                postingList = monthList as MutableList<Posting>
+                viewModel.getPostingsList(position + 1)
             }
 
         }
 
-        if (!this::postingList.isInitialized) {
-            postingList = mutableListOf<Posting>()
-        }
-
-        val postAdapter = MainAdapter(postingList, this)
+        val postAdapter = MainAdapter(this)
         val rvMain = binding.rvMain
         rvMain.layoutManager = LinearLayoutManager(context)
         rvMain.adapter = postAdapter
@@ -92,8 +85,17 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
             postingList = it
             rvMain.adapter = postAdapter
             postAdapter.postingAdapterList = postingList
+
+            var sum: Double = 0.0
+            postingList.forEach {
+                sum += it.valor
+            }
+            binding.tvSum.text = "%.2f".format(sum)
         }
-        viewModel.getPostingsList()
+
+        if (!this::postingList.isInitialized) {
+            viewModel.getPostingsList()
+        }
     }
 
     override fun postClick(position: Int) {

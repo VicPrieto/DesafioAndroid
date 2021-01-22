@@ -10,11 +10,11 @@ interface Service {
 
     @GET("lancamentos")
     suspend fun getPostings(
-    ): List<Posting>
+    ): MutableList<Posting>
 
-//    @GET("categorias")
-//    suspend fun getCategories(
-//    ): List<Category>
+    @GET("categorias")
+    suspend fun getCategories(
+    ): MutableList<Category>
 
     companion object {
         private const val BASE_URL = "https://desafio-it-server.herokuapp.com/"

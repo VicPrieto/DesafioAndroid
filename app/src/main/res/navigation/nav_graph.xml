@@ -18,5 +18,9 @@
         android:id="@+id/detailFragment"
         android:name="com.desafioandroid.ui.DetailFragment"
         android:label="fragment_detail"
-        tools:layout="@layout/fragment_detail" />
+        tools:layout="@layout/fragment_detail" >
+        <argument
+            android:name="lancamento"
+            app:argType="com.desafioandroid.model.Posting" />
+    </fragment>
 </navigation>

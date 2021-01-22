@@ -4,24 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.desafioandroid.R
 import com.desafioandroid.databinding.FragmentMainBinding
 import com.desafioandroid.model.Posting
 import com.desafioandroid.service.Service
 import com.desafioandroid.viewmodels.MainViewModel
-import kotlinx.android.synthetic.main.fragment_main.*
 
 class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
 
     lateinit var binding: FragmentMainBinding
-    lateinit var postingList: List<Posting>
+    lateinit var postingList: MutableList<Posting>
+
+    lateinit var spinner: Spinner
 
     val viewModel: MainViewModel by viewModels() {
         object : ViewModelProvider.Factory {
@@ -42,8 +45,41 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        spinner = binding.spMain
+
+        context?.let {
+            ArrayAdapter.createFromResource(
+                it,
+                R.array.months_array,
+                android.R.layout.simple_spinner_item
+            )
+                .also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinner.adapter = adapter
+                }
+        }
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                adapterView: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                p4: Long
+            ) {
+                var monthList = postingList.filter {
+                    it.mes_lancamento == position + 1
+                }
+                postingList = monthList as MutableList<Posting>
+            }
+
+        }
+
         if (!this::postingList.isInitialized) {
-            postingList = listOf<Posting>()
+            postingList = mutableListOf<Posting>()
         }
 
         val postAdapter = MainAdapter(postingList, this)
@@ -61,9 +97,12 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
     }
 
     override fun postClick(position: Int) {
-        val bundle = bundleOf("lancamento" to postingList[position])
-
-        findNavController().navigate(R.id.action_mainFragment_to_detailFragment, bundle)
+        val clickedItem: Posting = postingList[position]
+        findNavController(this).navigate(
+            MainFragmentDirections.actionMainFragmentToDetailFragment(
+                clickedItem
+            )
+        )
     }
 
 }

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
@@ -23,7 +24,6 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
 
     lateinit var binding: FragmentMainBinding
     lateinit var postingList: MutableList<Posting>
-
     lateinit var spinner: Spinner
 
     val viewModel: MainViewModel by viewModels() {
@@ -45,23 +45,24 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //Filtro com Spinner
         spinner = binding.spMain
 
         context?.let {
             ArrayAdapter.createFromResource(
                 it,
                 R.array.months_array,
-                android.R.layout.simple_spinner_item
+                R.layout.spinner_item
             )
                 .also { adapter ->
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    adapter.setDropDownViewResource(R.layout.spinner_dropdown)
                     spinner.adapter = adapter
                 }
         }
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                TODO("Not yet implemented")
+                viewModel.getPostingsList(1)
             }
 
             override fun onItemSelected(
@@ -72,9 +73,9 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
             ) {
                 viewModel.getPostingsList(position + 1)
             }
-
         }
 
+        //RecyclerView e Adapter
         val postAdapter = MainAdapter(this)
         val rvMain = binding.rvMain
         rvMain.layoutManager = LinearLayoutManager(context)
@@ -86,18 +87,21 @@ class MainFragment : Fragment(), MainAdapter.OnPostClickListener {
             rvMain.adapter = postAdapter
             postAdapter.postingAdapterList = postingList
 
+            //Balanco do mes
             var sum: Double = 0.0
             postingList.forEach {
                 sum += it.valor
             }
             binding.tvSum.text = "%.2f".format(sum)
-        }
 
-        if (!this::postingList.isInitialized) {
-            viewModel.getPostingsList()
+            //Nenhum lancamento no mes
+            if (postingList.isEmpty()) {
+                Toast.makeText(context, "Nenhum lançamento encontrado", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
+    //Passando dados pelo navigation para proximo Fragment
     override fun postClick(position: Int) {
         val clickedItem: Posting = postingList[position]
         findNavController(this).navigate(
